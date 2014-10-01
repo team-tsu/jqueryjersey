@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Test</title>
+<style>
+html{
+	margin:0px;
+	font-size:14px;
+	color:#4C9ED9;
+}
+a{color:#FFF;text-decoration:none;background:#4C9ED9;padding:10px;border-radius:10px;border:1px solid #333;}
+.respuestas{
+	margin-top:50px;
+	width:95%;
+	height:150px;
+	background:#EBECED;
+	overflow-y: scroll;
+	color:#333;
+}
+.div{
+	width:350px;
+	height: 300px;
+	border-right:1px solid #444;
+	float:left;
+	padding:10px;
+}
+</style>
+<!-- <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script> IE.9-->
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript">
+	
+	function llamadaSincrona(){
+		var identificador = Math.floor((Math.random() * 100) + 1);
+		$(".sincronas").html("");
+		$(".sincronas").append("Peticion: "+identificador+"<br>");
+		$.ajax({ url: "rest/sincrona", type:"GET", dataType: "json", async:false, timeout: 10000, data: {'id':identificador},
+			success: callbackSincrono,
+			fail: callbackError
+		});
+		$(".sincronas").append("Fin sincrono<br>");
+	}
+	
+	function callbackSincrono(json){
+		$(".sincronas").append("Respuesta: "+json.identificador+"<br>");
+	}
+	
+	function callbackError(json){
+		$(".errores").append("Respuesta: Error "+json.identificador+"<br>");
+	}
+	
+	function llamadaAsincrona(){
+		var identificador = Math.floor((Math.random() * 100) + 1);
+		$(".asincronas").html("");
+		$(".asincronas").append("Peticion: "+identificador+"<br>");
+		$.ajax({ url: "rest/asincrona", type:"GET", dataType: "json", timeout: 10000, data: {'id':identificador},
+			success: callbackAsincrono,
+			fail: callbackError
+		});
+		$(".asincronas").append("Fin asincrono<br>");
+	}
+	
+	function callbackAsincrono(json){
+		$(".asincronas").append("Respuesta: "+json.identificador+"<br>");		
+	}
+	
+	function llamadaEventos(){			
+		$.ajax({ url: "rest/eventos", type:"GET", dataType: "json", timeout: 60000, 
+			success: callbackEventos,
+			fail: callbackError
+		});
+		$(".eventos").append("Esperando eventos del servidor<br>");
+	}
+	
+	function callbackEventos(json){
+		//$(".eventos").html("");
+		$(".eventos").append("Respuesta: "+json.identificador+"<br>");
+		llamadaEventos();
+		$(".eventos").animate({ scrollTop: $(".eventos")[0].scrollHeight}, 1000);
+	}
+	
+	function generarEvento(){		
+		$.ajax({ url: "rest/apilar", type:"GET", dataType: "json",success: function(){$(".eventos").append("Evento registrado<br>");} });		
+	}
+</script>
+</head>
+<body>
+
+<div class="div">
+<a href="#" onclick="llamadaSincrona();return false;">1. Lanzar llamada sincrona</a><br>
+<div class="respuestas sincronas"></div>
+</div>
+
+<div class="div">
+<a href="#" onclick="llamadaAsincrona();return false;">2. Lanzar llamada asincrona</a><br>
+<div class="respuestas asincronas"></div>
+</div>
+
+<div class="div">
+<a href="#" onclick="llamadaEventos();return false;">3. Escuchar eventos</a>-<a href="#" onclick="generarEvento();return false;">3. Generar evento en el servidor</a><br>
+<div class="respuestas eventos"></div>
+</div>
+
+</body>
+</html>
